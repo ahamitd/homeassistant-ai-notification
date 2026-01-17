@@ -82,9 +82,20 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         # 2. Use dynamic list if available, otherwise fallback to hardcoded
         if dynamic_models:
             model_options = dynamic_models
-            # Ensure current selection is valid or default to first available
+            # PREFER gemini-1.5-flash-8b or 001 if available in the dynamic list
+            # because 2.0 often has 0 quota for new keys
+            preferred_defaults = ["gemini-1.5-flash-8b", "gemini-1.5-flash-001", "gemini-1.5-flash"]
+            
+            # Find the best default from available models
+            best_default = list(model_options.keys())[0] # Fallback to first
+            for pref in preferred_defaults:
+                if pref in model_options:
+                    best_default = pref
+                    break
+            
+            # Use current selection if valid, else best default
             if current_model not in model_options:
-                current_model = list(model_options.keys())[0]
+                current_model = best_default
         else:
             model_options = MODEL_OPTIONS
             if current_model not in model_options:

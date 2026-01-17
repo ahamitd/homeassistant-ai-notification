@@ -14,4 +14,4 @@ MODEL_OPTIONS = {
     "gemini-1.5-flash-001": "Gemini 1.5 Flash 001 (Eski)",
 }
 
-DEFAULT_MODEL = "gemini-2.0-flash"
+DEFAULT_MODEL = "gemini-1.5-flash-8b"
