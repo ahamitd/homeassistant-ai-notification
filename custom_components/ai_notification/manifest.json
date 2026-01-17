@@ -3,9 +3,9 @@
     "name": "AI Notification Generator",
     "codeowners": [],
     "config_flow": true,
-    "documentation": "https://github.com/hamitdurmus/homeassistant-ai-notification",
+    "documentation": "https://github.com/ahamitd/homeassistant-ai-notification",
     "iot_class": "local_push",
-    "issue_tracker": "https://github.com/hamitdurmus/homeassistant-ai-notification/issues",
+    "issue_tracker": "https://github.com/ahamitd/homeassistant-ai-notification/issues",
     "requirements": [
         "openai>=1.0.0",
         "google-generativeai>=0.3.0",
