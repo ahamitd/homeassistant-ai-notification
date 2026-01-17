@@ -138,7 +138,7 @@ Mode: {mode}
         DOMAIN, 
         "generate", 
         generate_notification,
-        supports_response=SupportsResponse.ONLY
+        supports_response=SupportsResponse.OPTIONAL
     )
 
     return True
