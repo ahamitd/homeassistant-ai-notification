@@ -9,7 +9,9 @@ from .const import (
     CONF_NOTIFY_SERVICE_1,
     CONF_NOTIFY_SERVICE_2,
     CONF_NOTIFY_SERVICE_3,
-    CONF_NOTIFY_SERVICE_4
+    CONF_NOTIFY_SERVICE_4,
+    MODEL_OPTIONS,
+    DEFAULT_MODEL
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,10 +53,14 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        current_model = self.config_entry.options.get(CONF_MODEL, DEFAULT_MODEL)
+        if current_model not in MODEL_OPTIONS:
+            current_model = DEFAULT_MODEL
+
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
-                vol.Optional(CONF_MODEL, default=self.config_entry.options.get(CONF_MODEL, "gemini-flash-latest")): str,
+                vol.Optional(CONF_MODEL, default=current_model): vol.In(MODEL_OPTIONS),
                 vol.Optional(CONF_NOTIFY_SERVICE_1, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_1, "")): str,
                 vol.Optional(CONF_NOTIFY_SERVICE_2, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_2, "")): str,
                 vol.Optional(CONF_NOTIFY_SERVICE_3, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_3, "")): str,
