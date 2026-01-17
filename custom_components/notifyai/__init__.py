@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         
     hass.data[DOMAIN][entry.entry_id] = {
         CONF_API_KEY: api_key,
-        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-1.5-flash-latest")
+        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-1.5-flash-002")
     }
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
