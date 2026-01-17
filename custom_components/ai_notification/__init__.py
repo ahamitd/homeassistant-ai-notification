@@ -194,24 +194,5 @@ def _call_api(api_key: str, model_name: str, system_prompt: str, content_parts: 
                  return response.text
             raise e
 
-    elif api_key.startswith("sk-"):
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key)
-        
-        text_content = ""
-        for part in content_parts:
-            if isinstance(part, str):
-                text_content += part
-        
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": text_content}
-            ],
-            temperature=0.7,
-        )
-        return response.choices[0].message.content
-        
     else:
-        raise ValueError("Unknown API Key format.")
+        raise ValueError("Only Google Gemini API keys (starting with 'AIza') are supported.")

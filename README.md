@@ -20,7 +20,9 @@ A professional-grade AI notification system for Home Assistant. It transforms st
 
 1. Go to **Settings > Devices & Services**.
 2. Add Integration > **AI Notification Generator**.
-3. Enter API Key (Google Gemini `AIza...` or OpenAI `sk-...`).
+3. Enter your **Google Gemini API Key** (starts with `AIza...`).
+   - Get your free API key at: [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+   - **Note**: This integration uses the Gemini API already installed by Home Assistant's official Gemini integration, so no additional dependencies are needed.
 
 ### 🔧 Global Settings (Important)
 Click **Configure** on the integration card to set:
