@@ -1,0 +1,58 @@
+generate:
+  name: Generate Notification
+  description: Generates a notification using AI, with optional image analysis and custom personas.
+  fields:
+    event:
+      name: Event
+      description: The event that triggered the notification (e.g., "Motion detected").
+      required: true
+      example: "Motion detected in garden"
+      selector:
+        text:
+    time:
+      name: Time
+      description: The time the event occurred.
+      required: true
+      example: "22:00"
+      selector:
+        text:
+    context:
+      name: Context
+      description: Context about the home (e.g., "Nobody home", "Door locked").
+      required: true
+      example: "Nobody home"
+      selector:
+        text:
+    mode:
+      name: Mode
+      description: The style/tone of the notification (ignored if Persona is set).
+      required: false
+      example: "formal"
+      selector:
+        select:
+          options:
+            - "fun"
+            - "smart"
+            - "formal"
+            - "mixed"
+    persona:
+      name: Persona (Pro)
+      description: A specific character or role for the AI (e.g., "Jarvis", "Grumpy Guard", "Funny Mom"). Overrides Mode.
+      required: false
+      example: "Jarvis"
+      selector:
+        text:
+    image_path:
+      name: Image Path (Pro)
+      description: Path to an image file (e.g. /tmp/snap.jpg) or URL to analyze.
+      required: false
+      example: "/config/www/snapshot.jpg"
+      selector:
+        text:
+    notify_service:
+      name: Notify Service (Optional)
+      description: The notification service to automatically call with the result (e.g., notify.mobile_app_iphone).
+      required: false
+      example: "notify.mobile_app_iphone"
+      selector:
+        text:

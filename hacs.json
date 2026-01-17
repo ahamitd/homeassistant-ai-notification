@@ -1,0 +1,6 @@
+{
+    "name": "AI Notification Generator",
+    "render_readme": true,
+    "filename": "ai_notification.zip",
+    "homeassistant": "2024.1.0"
+}
