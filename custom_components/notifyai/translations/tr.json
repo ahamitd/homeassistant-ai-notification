@@ -10,7 +10,9 @@
             }
         },
         "error": {
-            "cannot_connect": "API anahtarı geçersiz veya bağlantı kurulamadı."
+            "cannot_connect": "API anahtarı geçersiz veya bağlantı kurulamadı.",
+            "quota_exceeded": "Bu model için kotanız (limit: 0) dolu. Başka bir model seçin.",
+            "invalid_model": "Seçilen model ulaşılamaz veya mevcut değil."
         }
     },
     "options": {
