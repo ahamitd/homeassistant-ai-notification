@@ -72,7 +72,7 @@ generate:
       name: TTS Servisi
       description: "Kullanılacak ses sentezleme servisi. Varsayılan: tts.google_translate_say"
       required: false
-      default: "tts.google_translate_say"
+      default: "tts.cloud_say"
       example: "tts.cloud_say"
       selector:
         text:

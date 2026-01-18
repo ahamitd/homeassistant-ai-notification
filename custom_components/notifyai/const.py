@@ -7,8 +7,8 @@ CONF_NOTIFY_SERVICE_3 = "notify_service_3"
 CONF_NOTIFY_SERVICE_4 = "notify_service_4"
 
 MODEL_OPTIONS = {
-    "gemini-pro-latest": "Gemini Pro (En Kararlı)",
-    "gemini-flash-latest": "Gemini Flash (Hızlı)",
+    "gemini-flash-latest": "Gemini Flash Latest (En Uygun)",
+    "gemini-pro-latest": "Gemini Pro Latest (En Kararlı)",
 }
 
-DEFAULT_MODEL = "gemini-pro-latest"
+DEFAULT_MODEL = "gemini-flash-latest"
