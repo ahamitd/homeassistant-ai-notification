@@ -7,13 +7,12 @@ CONF_NOTIFY_SERVICE_3 = "notify_service_3"
 CONF_NOTIFY_SERVICE_4 = "notify_service_4"
 
 MODEL_OPTIONS = {
-    "gemini-2.0-flash": "Gemini 2.0 Flash (En Yeni - Önerilen)",
-    "gemini-2.5-flash": "Gemini 2.5 Flash (Çok Güçlü)",
-    "gemini-flash-latest": "Gemini Flash Latest (Daima Güncel)",
-    "gemini-2.0-flash-lite": "Gemini 2.0 Flash Lite (Hızlı & Ücretsiz Kotası Olabilir)",
-    "gemini-flash-latest": "Gemini Flash Latest (Genel)",
-    "gemini-1.5-flash": "Gemini 1.5 Flash (Standart)",
-    "gemini-1.5-flash-001": "Gemini 1.5 Flash 001 (Eski)",
+    "gemini-flash-latest": "Gemini Flash (En Kararlı Alias)",
+    "gemini-pro-latest": "Gemini Pro (En Kararlı Alias)",
+    "gemini-2.0-flash": "Gemini 2.0 Flash (Yeni)",
+    "gemini-2.0-flash-lite": "Gemini 2.0 Flash Lite",
+    "gemini-1.5-flash": "Gemini 1.5 Flash",
+    "gemini-1.5-flash-8b": "Gemini 1.5 Flash 8b",
 }
 
-DEFAULT_MODEL = "gemini-1.5-flash-8b"
+DEFAULT_MODEL = "gemini-flash-latest"

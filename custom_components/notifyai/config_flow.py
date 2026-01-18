@@ -86,9 +86,8 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             model_options = MODEL_OPTIONS.copy()
             model_options.update(dynamic_models)
             
-            # PREFER gemini-1.5-flash-8b or 001 if available in the dynamic list
-            # because 2.0 often has 0 quota for new keys
-            preferred_defaults = ["gemini-1.5-flash-8b", "gemini-1.5-flash-001", "gemini-1.5-flash"]
+            # PREFER gemini-flash-latest as the absolute safest choice
+            preferred_defaults = ["gemini-flash-latest", "gemini-1.5-flash", "gemini-2.0-flash-lite"]
             
             # Find the best default from available models
             best_default = list(model_options.keys())[0] # Fallback to first

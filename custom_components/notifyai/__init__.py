@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         
     hass.data[DOMAIN][entry.entry_id] = {
         CONF_API_KEY: api_key,
-        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-2.0-flash")
+        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-flash-latest")
     }
 
     # Debug: List available models to help user find correct one
