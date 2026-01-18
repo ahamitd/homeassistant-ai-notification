@@ -97,19 +97,37 @@ Mode: {mode}"""
                 title = custom_title
                 body = response_text.strip()
             else:
-                title = ""
-                body = ""
-                
-                lines = response_text.strip().split('\n')
-                for line in lines:
-                    if line.startswith("Title:"):
-                        title = line.replace("Title:", "").strip()
-                    elif line.startswith("Body:"):
-                        body = line.replace("Body:", "").strip()
-                
-                if not title and not body:
-                     title = "Bildirim"
-                     body = response_text
+                try:
+                    # 1. Try strict JSON
+                    ai_response = json.loads(response_text)
+                    title = ai_response.get("title", "AI Bildirim")
+                    body = ai_response.get("body", "")
+                except:
+                    # 2. Try to find JSON block
+                    match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                    if match:
+                        try:
+                            ai_response = json.loads(match.group())
+                            title = ai_response.get("title", "AI Bildirim")
+                            body = ai_response.get("body", "")
+                        except:
+                            pass
+                    
+                    if not title or not body:
+                        # 3. Fallback: Parse "Title: ... Body: ..." format
+                        title = "Bildirim"
+                        body = response_text
+                        
+                        for line in response_text.split('\n'):
+                            clean_line = line.strip()
+                            if clean_line.lower().startswith('title:'):
+                                title = clean_line.split(':', 1)[1].strip()
+                            elif clean_line.lower().startswith('body:'):
+                                body = clean_line.split(':', 1)[1].strip()
+                            elif clean_line.lower().startswith('başlık:'):
+                                title = clean_line.split(':', 1)[1].strip()
+                            elif clean_line.lower().startswith('gönderi:'):
+                                body = clean_line.split(':', 1)[1].strip()
 
             # Determine targets
             targets = []
