@@ -8,6 +8,8 @@ import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.const import CONF_API_KEY
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     DOMAIN, 
@@ -300,6 +302,7 @@ async def call_gemini_api(
     """Call Google Gemini API directly via REST."""
     
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+    session = async_get_clientsession(hass)
     
     # Build request payload
     contents = []
@@ -325,31 +328,30 @@ async def call_gemini_api(
         }
     }
     
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=payload) as response:
-            if response.status != 200:
-                error_text = await response.text()
-                raise Exception(f"Gemini API error ({response.status}): {error_text}")
-            
-            data = await response.json()
-            
-            # Extract text from response
-            try:
-                return data["candidates"][0]["content"]["parts"][0]["text"]
-            except (KeyError, IndexError) as e:
-                raise Exception(f"Unexpected API response format: {data}")
+    async with session.post(url, json=payload) as response:
+        if response.status != 200:
+            error_text = await response.text()
+            raise Exception(f"Gemini API error ({response.status}): {error_text}")
+        
+        data = await response.json()
+        
+        # Extract text from response
+        try:
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError) as e:
+            raise Exception(f"Unexpected API response format: {data}")
 
 async def log_available_models(hass: HomeAssistant, api_key: str):
     """Query API to list available models and log them."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+    session = async_get_clientsession(hass)
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    models = [m['name'] for m in data.get('models', [])]
-                    _LOGGER.warning("✅ NotifyAI - Available Models for your Key: %s", ", ".join(models))
-                else:
-                    _LOGGER.error("❌ NotifyAI - Could not list models: %s", await response.text())
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                models = [m['name'] for m in data.get('models', [])]
+                _LOGGER.warning("✅ NotifyAI - Available Models for your Key: %s", ", ".join(models))
+            else:
+                _LOGGER.error("❌ NotifyAI - Could not list models: %s", await response.text())
     except Exception as e:
         _LOGGER.error("❌ NotifyAI - Error listing models: %s", e)
