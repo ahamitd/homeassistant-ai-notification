@@ -157,6 +157,13 @@ Mode: {mode}"""
                         _LOGGER.error("NotifyAI - Invalid TTS service format (missing dot): %s", tts_service)
                 except Exception as e:
                     _LOGGER.error("NotifyAI - Failed to call TTS service: %s", e)
+                    # Log all available TTS services to help the user
+                    all_services = hass.services.async_services()
+                    if "tts" in all_services:
+                         tts_svcs = [f"tts.{s}" for s in all_services["tts"].keys()]
+                         _LOGGER.warning("NotifyAI - Available TTS services on your system: %s", ", ".join(tts_svcs))
+                    else:
+                         _LOGGER.warning("NotifyAI - No services found in 'tts' domain. Do you have a TTS integration installed?")
 
             return {
                 "title": title,
