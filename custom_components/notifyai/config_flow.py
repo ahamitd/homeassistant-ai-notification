@@ -123,7 +123,7 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             model_options = dynamic_models
             # Ensure current selection is valid or default to most stable
             if current_model not in model_options:
-                preferred_defaults = ["gemini-pro-latest", "gemini-flash-latest"]
+                preferred_defaults = ["gemini-2.0-flash-lite-preview-02-05", "gemini-2.0-flash-exp", "gemini-pro-latest", "gemini-flash-latest"]
                 for pref in preferred_defaults:
                     if pref in model_options:
                         current_model = pref
