@@ -10,8 +10,9 @@ MODEL_OPTIONS = {
     "gemini-2.0-flash": "Gemini 2.0 Flash (En Yeni - Önerilen)",
     "gemini-2.5-flash": "Gemini 2.5 Flash (Çok Güçlü)",
     "gemini-flash-latest": "Gemini Flash Latest (Daima Güncel)",
-    "gemini-2.0-flash-lite": "Gemini 2.0 Flash Lite (Hızlı)",
-    "gemini-1.5-flash": "Gemini 1.5 Flash (Standart - Güvenli)",
+    "gemini-2.0-flash-lite": "Gemini 2.0 Flash Lite (Hızlı & Ücretsiz Kotası Olabilir)",
+    "gemini-flash-latest": "Gemini Flash Latest (Genel)",
+    "gemini-1.5-flash": "Gemini 1.5 Flash (Standart)",
     "gemini-1.5-flash-001": "Gemini 1.5 Flash 001 (Eski)",
 }
 
