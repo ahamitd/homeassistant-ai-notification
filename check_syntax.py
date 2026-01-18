@@ -3,9 +3,9 @@ import sys
 import os
 
 files = [
-    "custom_components/ai_notification/__init__.py",
-    "custom_components/ai_notification/config_flow.py",
-    "custom_components/ai_notification/const.py"
+    "custom_components/notifyai/__init__.py",
+    "custom_components/notifyai/config_flow.py",
+    "custom_components/notifyai/const.py"
 ]
 
 has_error = False

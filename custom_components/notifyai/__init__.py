@@ -157,52 +157,87 @@ Mode: {mode}"""
             # Send TTS if audio device is selected
             if audio_device and tts_service:
                 _LOGGER.info("NotifyAI - Attempting TTS on %s via %s", audio_device, tts_service)
-                try:
-                    # Combine title and body for a more natural speech experience
-                    full_message = f"{title}. {body}"
-                    
-                    # Remove markdown characters and emojis from body for better TTS
-                    clean_message = full_message.replace("*", "").replace("#", "").replace("- ", "").replace("`", "")
-                    clean_message = re.sub(r'[\U00010000-\U0010ffff]', '', clean_message)
-                    
-                    # Modern HA format: tts.speak action
-                    tts_data = {
-                        "entity_id": tts_service,
-                        "media_player_entity_id": audio_device,
-                        "message": clean_message.strip(),
+                
+                # Combine title and body for a more natural speech experience
+                full_message = f"{title}. {body}"
+                
+                # Remove markdown characters and emojis from body for better TTS
+                clean_message = full_message.replace("*", "").replace("#", "").replace("- ", "").replace("`", "")
+                clean_message = re.sub(r'[\U00010000-\U0010ffff]', '', clean_message)
+                clean_message = clean_message.strip()
+
+                async def perform_tts_call(service_name, service_data, is_legacy=False):
+                    """Helper to perform TTS call with language fallback."""
+                    try:
+                        domain = "tts" if not is_legacy else tts_service.split(".", 1)[0]
+                        service = service_name if not is_legacy else tts_service.split(".", 1)[1]
+                        
+                        _LOGGER.debug("NotifyAI - Calling %s.%s with data: %s", domain, service, service_data)
+                        await hass.services.async_call(
+                            domain, service, service_data,
+                            blocking=True 
+                        )
+                        return True
+                    except Exception as e:
+                        error_msg = str(e)
+                        _LOGGER.warning("NotifyAI - TTS call failed (%s): %s", service_name, error_msg)
+                        
+                        # Fallback for language support error
+                        if "not supported" in error_msg.lower() and "language" in error_msg.lower() and "language" in service_data:
+                            lang = service_data.get("language")
+                            
+                            # 1. Try normalization (e.g. 'tr' -> 'tr-TR') if it's a 2-char code
+                            if lang and len(lang) == 2:
+                                normalized_lang = f"{lang}-{lang.upper()}"
+                                _LOGGER.info("NotifyAI - Language '%s' failed, trying normalized '%s'", lang, normalized_lang)
+                                fallback_data = service_data.copy()
+                                fallback_data["language"] = normalized_lang
+                                try:
+                                    await hass.services.async_call(domain, service, fallback_data, blocking=True)
+                                    _LOGGER.info("NotifyAI - TTS successful with normalized language code: %s", normalized_lang)
+                                    return True
+                                except Exception as e_norm:
+                                    _LOGGER.warning("NotifyAI - Normalized language also failed: %s", e_norm)
+
+                            # 2. Last resort: try without language parameter entirely
+                            _LOGGER.info("NotifyAI - Language support completely failed for %s, trying without language parameter.", service_name)
+                            final_fallback_data = service_data.copy()
+                            final_fallback_data.pop("language")
+                            
+                            try:
+                                await hass.services.async_call(
+                                    domain, service, final_fallback_data,
+                                    blocking=True
+                                )
+                                _LOGGER.info("NotifyAI - TTS successful without language parameter")
+                                return True
+                            except Exception as e_final:
+                                _LOGGER.error("NotifyAI - All TTS methods failed: %s", e_final)
+                        return False
+
+                # 1. Try Modern format: tts.speak
+                tts_data = {
+                    "entity_id": tts_service,
+                    "media_player_entity_id": audio_device,
+                    "message": clean_message,
+                    "cache": True
+                }
+                if language:
+                    tts_data["language"] = language
+
+                success = await perform_tts_call("speak", tts_data)
+                
+                # 2. Try Legacy fallback if modern failed and it's not already a legacy service name
+                if not success and "." in tts_service and not tts_service.startswith("tts."):
+                    legacy_data = {
+                        "entity_id": audio_device, 
+                        "message": clean_message,
                         "cache": True
                     }
                     if language:
-                        tts_data["language"] = language
-                        
-                    await hass.services.async_call(
-                        "tts", "speak",
-                        tts_data,
-                        blocking=False
-                    )
-                    _LOGGER.info("NotifyAI - TTS (tts.speak) call sent successfully")
-                except Exception as e:
-                    _LOGGER.error("NotifyAI - Failed to call tts.speak: %s. Falling back to legacy call.", e)
-                    # Legacy fallback
-                    try:
-                        if "." in tts_service:
-                            tts_domain, tts_svc = tts_service.split(".", 1)
-                            legacy_data = {
-                                "entity_id": audio_device, 
-                                "message": clean_message.strip(),
-                                "cache": True
-                            }
-                            if language:
-                                legacy_data["language"] = language
-                                
-                            await hass.services.async_call(
-                                tts_domain, tts_svc,
-                                legacy_data,
-                                blocking=False
-                            )
-                            _LOGGER.info("NotifyAI - Legacy TTS call sent successfully")
-                    except Exception as e2:
-                        _LOGGER.error("NotifyAI - Legacy fallback also failed: %s", e2)
+                        legacy_data["language"] = language
+                    
+                    await perform_tts_call(None, legacy_data, is_legacy=True)
 
             return {
                 "title": title,
