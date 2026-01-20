@@ -39,18 +39,18 @@ MODEL_LIMITS_FALLBACK = {
 
 # Groq Models
 GROQ_MODELS = {
-    "llama-3.1-70b-versatile": "Llama 3.1 70B (8000 RPM, 14400/gün)",
+    "llama-3.3-70b-versatile": "Llama 3.3 70B (8000 RPM, 14400/gün)",
     "llama-3.1-8b-instant": "Llama 3.1 8B Instant (30000 RPM, 14400/gün)",
-    "mixtral-8x7b-32768": "Mixtral 8x7B (5000 RPM, 14400/gün)",
+    "llama-3.3-70b-specdec": "Llama 3.3 70B Speculative (8000 RPM, 14400/gün)",
     "gemma2-9b-it": "Gemma 2 9B (15000 RPM, 14400/gün)",
 }
 
-DEFAULT_GROQ_MODEL = "llama-3.1-70b-versatile"
+DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # Groq Model Limits (all have same daily limit)
 GROQ_MODEL_LIMITS = {
-    "llama-3.1-70b-versatile": {"rpm": 8000, "rpd": 14400},
+    "llama-3.3-70b-versatile": {"rpm": 8000, "rpd": 14400},
     "llama-3.1-8b-instant": {"rpm": 30000, "rpd": 14400},
-    "mixtral-8x7b-32768": {"rpm": 5000, "rpd": 14400},
+    "llama-3.3-70b-specdec": {"rpm": 8000, "rpd": 14400},
     "gemma2-9b-it": {"rpm": 15000, "rpd": 14400},
 }
