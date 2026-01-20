@@ -190,7 +190,7 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     def _mask_api_key(self, api_key: str) -> str:
         """Mask API key for display (show first 3 and last 3 characters)."""
@@ -201,13 +201,13 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the main options - Model and Notification Services."""
         errors = {}
-        provider = self.config_entry.data.get(CONF_AI_PROVIDER, "gemini")
+        provider = self._config_entry.data.get(CONF_AI_PROVIDER, "gemini")
         
         # Get appropriate API key
         if provider == "gemini":
-            api_key = self.config_entry.data.get(CONF_API_KEY)
+            api_key = self._config_entry.data.get(CONF_API_KEY)
         else:  # groq
-            api_key = self.config_entry.data.get(CONF_GROQ_API_KEY)
+            api_key = self._config_entry.data.get(CONF_GROQ_API_KEY)
         
         # Get masked key and provider display name for UI
         masked_key = self._mask_api_key(api_key)
@@ -246,7 +246,7 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                 else:
                     errors[CONF_MODEL] = "invalid_model"
 
-        current_model = self.config_entry.options.get(CONF_MODEL)
+        current_model = self._config_entry.options.get(CONF_MODEL)
         
         # Fetch models based on provider
         if provider == "gemini":
@@ -306,10 +306,10 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema({
                 vol.Optional(CONF_MODEL, default=current_model): vol.In(model_options),
-                vol.Optional(CONF_NOTIFY_SERVICE_1, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_1, "")): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_2, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_2, "")): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_3, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_3, "")): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_4, default=self.config_entry.options.get(CONF_NOTIFY_SERVICE_4, "")): str,
+                vol.Optional(CONF_NOTIFY_SERVICE_1, default=self._config_entry.options.get(CONF_NOTIFY_SERVICE_1, "")): str,
+                vol.Optional(CONF_NOTIFY_SERVICE_2, default=self._config_entry.options.get(CONF_NOTIFY_SERVICE_2, "")): str,
+                vol.Optional(CONF_NOTIFY_SERVICE_3, default=self._config_entry.options.get(CONF_NOTIFY_SERVICE_3, "")): str,
+                vol.Optional(CONF_NOTIFY_SERVICE_4, default=self._config_entry.options.get(CONF_NOTIFY_SERVICE_4, "")): str,
                 vol.Optional("advanced_settings", default=False): bool,
             }),
             errors=errors
@@ -317,13 +317,13 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_advanced(self, user_input=None):
         """Handle advanced settings - API key and provider management."""
-        provider = self.config_entry.data.get(CONF_AI_PROVIDER, "gemini")
+        provider = self._config_entry.data.get(CONF_AI_PROVIDER, "gemini")
         
         # Get appropriate API key
         if provider == "gemini":
-            api_key = self.config_entry.data.get(CONF_API_KEY)
+            api_key = self._config_entry.data.get(CONF_API_KEY)
         else:  # groq
-            api_key = self.config_entry.data.get(CONF_GROQ_API_KEY)
+            api_key = self._config_entry.data.get(CONF_GROQ_API_KEY)
         
         masked_key = self._mask_api_key(api_key)
         provider_display = "Google Gemini" if provider == "gemini" else "Groq"
@@ -352,7 +352,7 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_change_api_key(self, user_input=None):
         """Handle API key change."""
         errors = {}
-        provider = self.config_entry.data.get(CONF_AI_PROVIDER, "gemini")
+        provider = self._config_entry.data.get(CONF_AI_PROVIDER, "gemini")
         
         if user_input is not None:
             new_api_key = user_input.get("new_api_key")
@@ -366,13 +366,13 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                     models, _, _ = await fetch_models(new_api_key)
                     if models:
                         # Update config entry data
-                        new_data = dict(self.config_entry.data)
+                        new_data = dict(self._config_entry.data)
                         new_data[CONF_API_KEY] = new_api_key
                         self.hass.config_entries.async_update_entry(
-                            self.config_entry, data=new_data
+                            self._config_entry, data=new_data
                         )
                         # Reload the integration
-                        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                        await self.hass.config_entries.async_reload(self._config_entry.entry_id)
                         return self.async_create_entry(title="", data={})
                     else:
                         errors["new_api_key"] = "invalid_api_key"
@@ -381,13 +381,13 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                     success, error_msg = await validate_groq_model(new_api_key, DEFAULT_GROQ_MODEL)
                     if success:
                         # Update config entry data
-                        new_data = dict(self.config_entry.data)
+                        new_data = dict(self._config_entry.data)
                         new_data[CONF_GROQ_API_KEY] = new_api_key
                         self.hass.config_entries.async_update_entry(
-                            self.config_entry, data=new_data
+                            self._config_entry, data=new_data
                         )
                         # Reload the integration
-                        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                        await self.hass.config_entries.async_reload(self._config_entry.entry_id)
                         return self.async_create_entry(title="", data={})
                     else:
                         errors["new_api_key"] = "invalid_api_key"
@@ -426,7 +426,7 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_change_provider(self, user_input=None):
         """Handle provider change."""
         errors = {}
-        current_provider = self.config_entry.data.get(CONF_AI_PROVIDER, "gemini")
+        current_provider = self._config_entry.data.get(CONF_AI_PROVIDER, "gemini")
         
         if user_input is not None:
             new_provider = user_input.get(CONF_AI_PROVIDER)
@@ -447,11 +447,11 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                         }
                         
                         self.hass.config_entries.async_update_entry(
-                            self.config_entry, data=new_data
+                            self._config_entry, data=new_data
                         )
                         
                         # Reset model to default and reload
-                        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                        await self.hass.config_entries.async_reload(self._config_entry.entry_id)
                         return self.async_create_entry(title="", data={CONF_MODEL: DEFAULT_MODEL})
                     else:
                         errors[CONF_API_KEY] = "invalid_api_key"
@@ -470,11 +470,11 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                         }
                         
                         self.hass.config_entries.async_update_entry(
-                            self.config_entry, data=new_data
+                            self._config_entry, data=new_data
                         )
                         
                         # Reset model to default and reload
-                        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                        await self.hass.config_entries.async_reload(self._config_entry.entry_id)
                         return self.async_create_entry(title="", data={CONF_MODEL: DEFAULT_GROQ_MODEL})
                     else:
                         errors[CONF_GROQ_API_KEY] = "invalid_api_key"
