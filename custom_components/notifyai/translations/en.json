@@ -3,14 +3,14 @@
         "step": {
             "user": {
                 "title": "NotifyAI Kurulumu",
-                "description": "NotifyAI Kurulumu\n\nYapay zeka sağlayıcınızı seçin:\n\n- Google Gemini: 1,500 istek/gün (Ücretsiz)\n- Groq: 14,400 istek/gün (Ücretsiz, Çok Hızlı)\n\nSonraki adımda API anahtarınızı gireceksiniz.",
+                "description": "**🤖 NotifyAI Kurulumu**\n\nYapay zeka sağlayıcınızı seçin:\n\n• **Google Gemini**: 1,500 istek/gün (Ücretsiz)\n• **Groq**: 14,400 istek/gün (Ücretsiz, Çok Hızlı)\n\nSonraki adımda API anahtarınızı gireceksiniz.",
                 "data": {
                     "ai_provider": "Yapay Zeka Sağlayıcısı"
                 }
             },
             "api_key": {
                 "title": "API Anahtarı",
-                "description": "API Anahtarı Nasıl Alınır?\n\nGoogle Gemini:\n1. https://aistudio.google.com/apikey adresine gidin\n2. Google hesabınızla giriş yapın\n3. Create API Key butonuna tıklayın\n4. Oluşturulan anahtarı kopyalayın\n\nGroq:\n1. https://console.groq.com/keys adresine gidin\n2. Groq hesabınızla giriş yapın\n3. Create API Key butonuna tıklayın\n4. Anahtar adı verin ve Submit yapın\n5. Oluşturulan anahtarı kopyalayın\n\nGüvenlik: API anahtarınızı kimseyle paylaşmayın",
+                "description": "**📍 API Anahtarı Nasıl Alınır?**\n\n**Google Gemini:**\n1. https://aistudio.google.com/apikey adresine gidin\n2. Google hesabınızla giriş yapın\n3. 'Create API Key' butonuna tıklayın\n4. Oluşturulan anahtarı kopyalayın\n\n**Groq:**\n1. https://console.groq.com/keys adresine gidin\n2. Groq hesabınızla giriş yapın\n3. 'Create API Key' butonuna tıklayın\n4. Anahtar adı verin ve 'Submit' yapın\n5. Oluşturulan anahtarı kopyalayın\n\n🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın",
                 "data": {
                     "api_key": "Google Gemini API Anahtarı",
                     "groq_api_key": "Groq API Anahtarı"
@@ -18,12 +18,12 @@
             }
         },
         "error": {
-            "invalid_api_key": "Geçersiz API anahtarı. Lütfen anahtarınızı kontrol edin.",
-            "cannot_connect": "API'ye bağlanılamadı. İnternet bağlantınızı kontrol edin.",
-            "unknown": "Bilinmeyen bir hata oluştu. Lütfen Home Assistant loglarını kontrol edin.",
-            "already_configured": "Bu API anahtarı zaten yapılandırılmış.",
-            "api_error": "API hatası: {error_message}",
-            "validation_failed": "API anahtarı doğrulanamadı. Anahtarın geçerli olduğundan emin olun."
+            "invalid_api_key": "❌ Geçersiz API anahtarı. Lütfen anahtarınızı kontrol edin.",
+            "cannot_connect": "❌ API'ye bağlanılamadı. İnternet bağlantınızı kontrol edin.",
+            "unknown": "❌ Bilinmeyen bir hata oluştu. Lütfen Home Assistant loglarını kontrol edin.",
+            "already_configured": "⚠️ Bu API anahtarı zaten yapılandırılmış.",
+            "api_error": "❌ API hatası: {error_message}",
+            "validation_failed": "❌ API anahtarı doğrulanamadı. Anahtarın geçerli olduğundan emin olun."
         },
         "abort": {
             "already_configured": "Bu entegrasyon zaten yapılandırılmış."
@@ -68,10 +68,10 @@
             }
         },
         "error": {
-            "invalid_api_key": "Geçersiz API anahtarı",
-            "invalid_model": "Geçersiz model seçimi",
-            "quota_exceeded": "API kotanız dolmuş. Lütfen daha sonra tekrar deneyin.",
-            "validation_failed": "Doğrulama başarısız. API anahtarını kontrol edin."
+            "invalid_api_key": "❌ Geçersiz API anahtarı",
+            "invalid_model": "❌ Geçersiz model seçimi",
+            "quota_exceeded": "⚠️ API kotanız dolmuş. Lütfen daha sonra tekrar deneyin.",
+            "validation_failed": "❌ Doğrulama başarısız. API anahtarını kontrol edin."
         }
     }
 }
