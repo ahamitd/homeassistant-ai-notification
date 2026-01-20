@@ -12,7 +12,13 @@ from .const import (
     CONF_NOTIFY_SERVICE_3,
     CONF_NOTIFY_SERVICE_4,
     MODEL_OPTIONS,
-    DEFAULT_MODEL
+    DEFAULT_MODEL,
+    CONF_AI_PROVIDER,
+    CONF_GROQ_API_KEY,
+    AI_PROVIDERS,
+    GROQ_MODELS,
+    DEFAULT_GROQ_MODEL,
+    GROQ_MODEL_LIMITS
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,18 +32,45 @@ class AiNotificationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            # Validate input (simple check if key is not empty)
-            if not user_input[CONF_API_KEY]:
-                errors["base"] = "cannot_connect"
-            else:
-                return self.async_create_entry(title="AI Notification", data=user_input)
+            provider = user_input.get(CONF_AI_PROVIDER, "gemini")
+            
+            if provider == "gemini":
+                api_key = user_input.get(CONF_API_KEY)
+                if not api_key:
+                    errors["base"] = "invalid_api_key"
+                else:
+                    return self.async_create_entry(
+                        title="NotifyAI (Gemini)", 
+                        data={
+                            CONF_AI_PROVIDER: "gemini",
+                            CONF_API_KEY: api_key
+                        }
+                    )
+            elif provider == "groq":
+                groq_key = user_input.get(CONF_GROQ_API_KEY)
+                if not groq_key:
+                    errors["base"] = "invalid_api_key"
+                else:
+                    return self.async_create_entry(
+                        title="NotifyAI (Groq)",
+                        data={
+                            CONF_AI_PROVIDER: "groq",
+                            CONF_GROQ_API_KEY: groq_key
+                        }
+                    )
 
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                vol.Required(CONF_API_KEY): str,
+                vol.Required(CONF_AI_PROVIDER, default="gemini"): vol.In(AI_PROVIDERS),
+                vol.Optional(CONF_API_KEY): str,
+                vol.Optional(CONF_GROQ_API_KEY): str,
             }),
             errors=errors,
+            description_placeholders={
+                "gemini_info": "Google Gemini API - 1500 istek/gün",
+                "groq_info": "Groq API - 14,400 istek/gün, çok hızlı"
+            }
         )
 
     @staticmethod
@@ -113,14 +146,23 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         errors = {}
-        api_key = self.config_entry.data.get(CONF_API_KEY)
+        provider = self.config_entry.data.get(CONF_AI_PROVIDER, "gemini")
+        
+        # Get appropriate API key
+        if provider == "gemini":
+            api_key = self.config_entry.data.get(CONF_API_KEY)
+        else:  # groq
+            api_key = self.config_entry.data.get(CONF_GROQ_API_KEY)
         
         # We need to maintain the list of available models across steps if validation fails
         if "model_options" not in self.hass.data.get(DOMAIN, {}):
-             dynamic_models, _, _ = await fetch_models(api_key)
-             model_options = dynamic_models if dynamic_models else MODEL_OPTIONS
+            if provider == "gemini":
+                dynamic_models, _, _ = await fetch_models(api_key)
+                model_options = dynamic_models if dynamic_models else MODEL_OPTIONS
+            else:  # groq
+                model_options = GROQ_MODELS
         else:
-             model_options = MODEL_OPTIONS # Fallback
+            model_options = GROQ_MODELS if provider == "groq" else MODEL_OPTIONS
 
         if user_input is not None:
             # VALIDATION STEP
@@ -132,45 +174,62 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             else:
                 _LOGGER.error("Model validation failed: %s", error_msg)
                 if "quota" in error_msg.lower() or "429" in error_msg:
-                    errors[CONF_MODEL] = "quota_exceeded" # Need to add to strings.json
+                    errors[CONF_MODEL] = "quota_exceeded"
                 else:
                     errors[CONF_MODEL] = "invalid_model"
 
         current_model = self.config_entry.options.get(CONF_MODEL)
         
-        # 1. Fetch models dynamically
-        dynamic_models, best_model, model_limits = await fetch_models(api_key)
-        
-        # Store model limits in hass.data for sensors
-        if model_limits:
+        # Fetch models based on provider
+        if provider == "gemini":
+            # 1. Fetch Gemini models dynamically
+            dynamic_models, best_model, model_limits = await fetch_models(api_key)
+            
+            # Store model limits in hass.data for sensors
+            if model_limits:
+                if DOMAIN not in self.hass.data:
+                    self.hass.data[DOMAIN] = {}
+                self.hass.data[DOMAIN]["model_limits"] = model_limits
+            
+            # 2. Use dynamic list ONLY if available
+            if dynamic_models:
+                model_options = dynamic_models
+                
+                # If no model selected yet, use the best model from API
+                if not current_model and best_model:
+                    current_model = best_model
+                elif not current_model:
+                    current_model = DEFAULT_MODEL
+                
+                # Ensure current model is in available options
+                if current_model not in model_options:
+                    # Try best model first
+                    if best_model and best_model in model_options:
+                        current_model = best_model
+                    else:
+                        # Fallback to first available
+                        current_model = list(model_options.keys())[0] if model_options else DEFAULT_MODEL
+            else:
+                model_options = MODEL_OPTIONS
+                if not current_model:
+                    current_model = DEFAULT_MODEL
+                elif current_model not in model_options:
+                    current_model = DEFAULT_MODEL
+        else:  # groq
+            # Use static Groq models
+            model_options = GROQ_MODELS
+            model_limits = GROQ_MODEL_LIMITS
+            
+            # Store model limits in hass.data for sensors
             if DOMAIN not in self.hass.data:
                 self.hass.data[DOMAIN] = {}
             self.hass.data[DOMAIN]["model_limits"] = model_limits
-        
-        # 2. Use dynamic list ONLY if available
-        if dynamic_models:
-            model_options = dynamic_models
             
-            # If no model selected yet, use the best model from API
-            if not current_model and best_model:
-                current_model = best_model
-            elif not current_model:
-                current_model = DEFAULT_MODEL
-            
-            # Ensure current model is in available options
-            if current_model not in model_options:
-                # Try best model first
-                if best_model and best_model in model_options:
-                    current_model = best_model
-                else:
-                    # Fallback to first available
-                    current_model = list(model_options.keys())[0] if model_options else DEFAULT_MODEL
-        else:
-            model_options = MODEL_OPTIONS
             if not current_model:
-                current_model = DEFAULT_MODEL
+                current_model = DEFAULT_GROQ_MODEL
             elif current_model not in model_options:
-                 current_model = DEFAULT_MODEL
+                current_model = DEFAULT_GROQ_MODEL
+
 
         return self.async_show_form(
             step_id="init",

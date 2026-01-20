@@ -7,7 +7,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, CONF_MODEL, MODEL_LIMITS_FALLBACK
+from .const import DOMAIN, CONF_MODEL, MODEL_LIMITS_FALLBACK, CONF_AI_PROVIDER, GROQ_MODEL_LIMITS
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -212,13 +213,17 @@ class NotifyAIDailyLimitSensor(SensorEntity):
     
     def _get_model_daily_limit(self, model_name):
         """Get daily limit for the model."""
-        # Try to get from API-fetched limits
-        model_limits = self._hass.data.get(DOMAIN, {}).get("model_limits", {})
-        if model_name in model_limits:
-            return model_limits[model_name].get('rpd', 1500)
+        provider = self._hass.data.get(DOMAIN, {}).get(self._entry.entry_id, {}).get(CONF_AI_PROVIDER, "gemini")
         
-        # Fallback to hardcoded limits
-        return MODEL_LIMITS_FALLBACK.get(model_name, {}).get('rpd', 1500)
+        if provider == "groq":
+            # All Groq models have 14,400/day
+            return GROQ_MODEL_LIMITS.get(model_name, {}).get('rpd', 14400)
+        else:
+            # Gemini models
+            model_limits = self._hass.data.get(DOMAIN, {}).get("model_limits", {})
+            if model_name in model_limits:
+                return model_limits[model_name].get('rpd', 1500)
+            return MODEL_LIMITS_FALLBACK.get(model_name, {}).get('rpd', 1500)
     
     async def async_update(self):
         """Update the sensor."""

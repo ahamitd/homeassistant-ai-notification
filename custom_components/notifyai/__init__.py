@@ -18,7 +18,9 @@ from .const import (
     CONF_NOTIFY_SERVICE_1,
     CONF_NOTIFY_SERVICE_2,
     CONF_NOTIFY_SERVICE_3,
-    CONF_NOTIFY_SERVICE_4
+    CONF_NOTIFY_SERVICE_4,
+    CONF_AI_PROVIDER,
+    CONF_GROQ_API_KEY
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,15 +29,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up AI Notification from a config entry."""
     hass.data.setdefault(DOMAIN, {})
     
-    api_key = entry.data.get(CONF_API_KEY)
+    provider = entry.data.get(CONF_AI_PROVIDER, "gemini")
+    
+    # Get appropriate API key based on provider
+    if provider == "gemini":
+        api_key = entry.data.get(CONF_API_KEY)
+    else:  # groq
+        api_key = entry.data.get(CONF_GROQ_API_KEY)
     
     if not api_key:
         _LOGGER.error("No API key found in configuration entry.")
         return False
         
     hass.data[DOMAIN][entry.entry_id] = {
-        CONF_API_KEY: api_key,
-        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-flash-latest"),
+        CONF_AI_PROVIDER: provider,
+        CONF_API_KEY: api_key,  # Store for backward compatibility
+        CONF_MODEL: entry.options.get(CONF_MODEL, "gemini-flash-latest" if provider == "gemini" else "llama-3.1-70b-versatile"),
         "usage_data": {
             "daily_count": 0,
             "last_call_time": None,
@@ -45,8 +54,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         }
     }
 
-    # Debug: List available models to help user find correct one
-    hass.async_create_task(log_available_models(hass, api_key))
+    # Debug: List available models to help user find correct one (only for Gemini)
+    if provider == "gemini":
+        hass.async_create_task(log_available_models(hass, api_key))
+
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
     
@@ -100,9 +111,22 @@ Mode: {mode}"""
                 _LOGGER.warning("Could not load image at %s: %s", image_path, e)
 
         try:
-            response_text = await call_gemini_api(
-                hass, api_key, model_name, system_prompt, user_message_text, image_data, entry.entry_id
-            )
+            # Get provider from hass.data
+            provider = hass.data[DOMAIN][entry.entry_id].get(CONF_AI_PROVIDER, "gemini")
+            
+            # Call appropriate API based on provider
+            if provider == "groq":
+                # Groq doesn't support images yet
+                if image_data:
+                    _LOGGER.warning("Groq doesn't support image analysis. Ignoring image.")
+                response_text = await call_groq_api(
+                    hass, api_key, model_name, system_prompt, user_message_text, entry.entry_id
+                )
+            else:  # gemini
+                response_text = await call_gemini_api(
+                    hass, api_key, model_name, system_prompt, user_message_text, image_data, entry.entry_id
+                )
+
             
             # Parse AI response first
             parsed_title = None
@@ -397,3 +421,65 @@ async def log_available_models(hass: HomeAssistant, api_key: str):
                 _LOGGER.error("❌ NotifyAI - Could not list models: %s", await response.text())
     except Exception as e:
         _LOGGER.error("❌ NotifyAI - Error listing models: %s", e)
+
+async def call_groq_api(
+    hass: HomeAssistant,
+    api_key: str,
+    model_name: str,
+    system_prompt: str,
+    user_text: str,
+    entry_id: str = None
+) -> str:
+    """Call Groq API (OpenAI-compatible)."""
+    from homeassistant.util import dt as dt_util
+    
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    session = async_get_clientsession(hass)
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 500
+    }
+    
+    # Track usage if entry_id is provided
+    if entry_id and entry_id in hass.data.get(DOMAIN, {}):
+        usage_data = hass.data[DOMAIN][entry_id].get("usage_data", {})
+    
+    async with session.post(url, json=payload, headers=headers) as response:
+        if response.status != 200:
+            error_text = await response.text()
+            
+            # Update usage tracking with error
+            if entry_id and entry_id in hass.data.get(DOMAIN, {}):
+                usage_data = hass.data[DOMAIN][entry_id].get("usage_data", {})
+                usage_data["last_call_time"] = dt_util.now().isoformat()
+                usage_data["last_call_status"] = f"Hata ({response.status})"
+                usage_data["last_error"] = error_text[:200]
+            
+            raise Exception(f"Groq API error ({response.status}): {error_text}")
+        
+        data = await response.json()
+        
+        # Update usage tracking with success
+        if entry_id and entry_id in hass.data.get(DOMAIN, {}):
+            usage_data = hass.data[DOMAIN][entry_id].get("usage_data", {})
+            usage_data["daily_count"] = usage_data.get("daily_count", 0) + 1
+            usage_data["last_call_time"] = dt_util.now().isoformat()
+            usage_data["last_call_status"] = "Başarılı"
+            usage_data["last_error"] = None
+        
+        # Extract response
+        try:
+            return data["choices"][0]["message"]["content"]
+        except (KeyError, IndexError) as e:
+            raise Exception(f"Unexpected Groq API response format: {data}")
