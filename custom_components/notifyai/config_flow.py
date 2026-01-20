@@ -48,6 +48,10 @@ class AiNotificationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle API key entry based on selected provider."""
         errors = {}
         
+        # Ensure provider is set
+        if not hasattr(self, 'provider'):
+            return await self.async_step_user()
+        
         if user_input is not None:
             if self.provider == "gemini":
                 api_key = user_input.get(CONF_API_KEY)
@@ -79,40 +83,15 @@ class AiNotificationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema = vol.Schema({
                 vol.Required(CONF_API_KEY): str,
             })
-            title = "Google Gemini API Anahtarı"
-            description = (
-                "📍 **API Anahtarı Nasıl Alınır?**\n\n"
-                "1. https://aistudio.google.com/apikey adresine gidin\n"
-                "2. Google hesabınızla giriş yapın\n"
-                "3. 'Create API Key' butonuna tıklayın\n"
-                "4. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\n\n"
-                "💰 **Ücretsiz Limit:** 1500 istek/gün\n"
-                "⚡ **Hız:** Orta\n"
-                "🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın"
-            )
         else:  # groq
             data_schema = vol.Schema({
                 vol.Required(CONF_GROQ_API_KEY): str,
             })
-            title = "Groq API Anahtarı"
-            description = (
-                "📍 **API Anahtarı Nasıl Alınır?**\n\n"
-                "1. https://console.groq.com/keys adresine gidin\n"
-                "2. Groq hesabınızla giriş yapın (yoksa ücretsiz oluşturun)\n"
-                "3. 'Create API Key' butonuna tıklayın\n"
-                "4. Anahtar adı verin ve 'Submit' yapın\n"
-                "5. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\n\n"
-                "💰 **Ücretsiz Limit:** 14,400 istek/gün\n"
-                "⚡ **Hız:** Çok Hızlı (En hızlı seçenek!)\n"
-                "🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın"
-            )
         
         return self.async_show_form(
             step_id="api_key",
             data_schema=data_schema,
-            errors=errors,
-            title=title,
-            description=description
+            errors=errors
         )
 
     @staticmethod

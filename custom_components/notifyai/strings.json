@@ -10,7 +10,7 @@
             },
             "api_key": {
                 "title": "API Anahtarı",
-                "description": "API anahtarınızı girin",
+                "description": "**📍 API Anahtarı Nasıl Alınır?**\n\n**Google Gemini:**\n1. https://aistudio.google.com/apikey adresine gidin\n2. Google hesabınızla giriş yapın\n3. 'Create API Key' butonuna tıklayın\n4. Oluşturulan anahtarı kopyalayın\n\n**Groq:**\n1. https://console.groq.com/keys adresine gidin\n2. Groq hesabınızla giriş yapın\n3. 'Create API Key' butonuna tıklayın\n4. Anahtar adı verin ve 'Submit' yapın\n5. Oluşturulan anahtarı kopyalayın\n\n🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın",
                 "data": {
                     "api_key": "Google Gemini API Anahtarı",
                     "groq_api_key": "Groq API Anahtarı"
