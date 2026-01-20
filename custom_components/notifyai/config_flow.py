@@ -82,32 +82,40 @@ class AiNotificationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema = vol.Schema({
                 vol.Required(CONF_API_KEY): str,
             })
+            title = "Google Gemini API Anahtarı"
             description = (
-                "Google Gemini API anahtarınızı girin.\\n\\n"
-                "📍 API Anahtarı Nereden Alınır?\\n"
-                "Google AI Studio: https://aistudio.google.com/apikey\\n\\n"
-                "💰 Ücretsiz: 1500 istek/gün\\n"
-                "⚡ Hız: Orta"
+                "📍 **API Anahtarı Nasıl Alınır?**\n\n"
+                "1. https://aistudio.google.com/apikey adresine gidin\n"
+                "2. Google hesabınızla giriş yapın\n"
+                "3. 'Create API Key' butonuna tıklayın\n"
+                "4. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\n\n"
+                "💰 **Ücretsiz Limit:** 1500 istek/gün\n"
+                "⚡ **Hız:** Orta\n"
+                "🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın"
             )
         else:  # groq
             data_schema = vol.Schema({
                 vol.Required(CONF_GROQ_API_KEY): str,
             })
+            title = "Groq API Anahtarı"
             description = (
-                "Groq API anahtarınızı girin.\\n\\n"
-                "📍 API Anahtarı Nereden Alınır?\\n"
-                "GroqCloud Console: https://console.groq.com/keys\\n\\n"
-                "💰 Ücretsiz: 14,400 istek/gün\\n"
-                "⚡ Hız: Çok Hızlı (En hızlı seçenek!)"
+                "📍 **API Anahtarı Nasıl Alınır?**\n\n"
+                "1. https://console.groq.com/keys adresine gidin\n"
+                "2. Groq hesabınızla giriş yapın (yoksa ücretsiz oluşturun)\n"
+                "3. 'Create API Key' butonuna tıklayın\n"
+                "4. Anahtar adı verin ve 'Submit' yapın\n"
+                "5. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\n\n"
+                "💰 **Ücretsiz Limit:** 14,400 istek/gün\n"
+                "⚡ **Hız:** Çok Hızlı (En hızlı seçenek!)\n"
+                "🔒 **Güvenlik:** API anahtarınızı kimseyle paylaşmayın"
             )
         
         return self.async_show_form(
             step_id="api_key",
             data_schema=data_schema,
             errors=errors,
-            description_placeholders={
-                "provider_info": description
-            }
+            title=title,
+            description=description
         )
 
     @staticmethod
@@ -325,11 +333,13 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional("advanced_settings", default=False): bool,
             }),
             errors=errors,
-            description_placeholders={
-                "current_provider": f"🤖 Sağlayıcı: {provider_display}",
-                "current_api_key": f"🔑 API: {masked_key}",
-                "info": "Gelişmiş ayarlar için 'Advanced Settings' kutusunu işaretleyin."
-            }
+            description=(
+                f"**🤖 Mevcut Sağlayıcı:** {provider_display}\\n"
+                f"**🔑 API Anahtarı:** {masked_key}\\n\\n"
+                "**AI Modeli:** Kullanmak istediğiniz yapay zeka modelini seçin\\n"
+                "**Bildirim Servisleri:** Bildirimlerin gönderileceği cihazları belirtin (örn: notify.mobile_app_iphone)\\n\\n"
+                "**⚙️ Gelişmiş Ayarlar:** API anahtarınızı değiştirmek veya sağlayıcıyı değiştirmek için 'Advanced Settings' kutusunu işaretleyin."
+            )
         )
 
     async def async_step_advanced(self, user_input=None):
@@ -364,11 +374,14 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
                     "back": "⬅️ Ana Ayarlara Dön"
                 }),
             }),
-            description_placeholders={
-                "current_provider": f"🤖 Mevcut Sağlayıcı: {provider_display}",
-                "current_api_key": f"🔑 Mevcut API: {masked_key}",
-                "info": "API anahtarınızı veya sağlayıcınızı değiştirebilirsiniz."
-            }
+            description=(
+                f"**🤖 Mevcut Sağlayıcı:** {provider_display}\\n"
+                f"**🔑 Mevcut API Anahtarı:** {masked_key}\\n\\n"
+                "**Gelişmiş Ayarlar Menüsü**\\n\\n"
+                "• **API Anahtarını Değiştir:** Mevcut sağlayıcı için yeni bir API anahtarı girin\\n"
+                "• **Sağlayıcıyı Değiştir:** Gemini ve Groq arasında geçiş yapın\\n"
+                "• **Ana Ayarlara Dön:** Model ve bildirim ayarlarına geri dönün"
+            )
         )
 
     async def async_step_change_api_key(self, user_input=None):
@@ -417,17 +430,33 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         provider_display = "Google Gemini" if provider == "gemini" else "Groq"
         api_url = "https://aistudio.google.com/apikey" if provider == "gemini" else "https://console.groq.com/keys"
         
+        if provider == "gemini":
+            instructions = (
+                "**📍 Yeni Gemini API Anahtarı Nasıl Alınır?**\\n\\n"
+                "1. https://aistudio.google.com/apikey adresine gidin\\n"
+                "2. Google hesabınızla giriş yapın\\n"
+                "3. 'Create API Key' butonuna tıklayın\\n"
+                "4. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\\n\\n"
+                "**⚠️ Önemli:** Yeni anahtar doğrulandıktan sonra entegrasyon otomatik olarak yeniden yüklenecektir."
+            )
+        else:
+            instructions = (
+                "**📍 Yeni Groq API Anahtarı Nasıl Alınır?**\\n\\n"
+                "1. https://console.groq.com/keys adresine gidin\\n"
+                "2. Groq hesabınızla giriş yapın\\n"
+                "3. 'Create API Key' butonuna tıklayın\\n"
+                "4. Anahtar adı verin ve 'Submit' yapın\\n"
+                "5. Oluşturulan anahtarı kopyalayın ve aşağıya yapıştırın\\n\\n"
+                "**⚠️ Önemli:** Yeni anahtar doğrulandıktan sonra entegrasyon otomatik olarak yeniden yüklenecektir."
+            )
+        
         return self.async_show_form(
             step_id="change_api_key",
             data_schema=vol.Schema({
                 vol.Required("new_api_key"): str,
             }),
             errors=errors,
-            description_placeholders={
-                "provider": provider_display,
-                "api_url": api_url,
-                "info": f"Yeni {provider_display} API anahtarınızı girin.\\n\\n📍 API Anahtarı: {api_url}"
-            }
+            description=instructions
         )
 
     async def async_step_change_provider(self, user_input=None):
