@@ -28,7 +28,8 @@ Sıradan "Hareket algılandı" yerine:
 ### 🎯 Temel Özellikler
 - **🇹🇷 Tam Türkçe**: Tüm bildirimler Türkçe olarak üretilir
 - **⚡ Sıfır Bağımlılık**: Hiçbir dış kütüphane gerektirmez, her Home Assistant'ta çalışır
-- **🎨 4 Farklı Mod**: Eğlenceli, Zeki, Resmi, Karışık
+- **🎨 5 Farklı Mod**: Eğlenceli, Zeki, Resmi, Sert, Karışık
+- **🤖 2 AI Provider**: Gemini (1500/gün) veya Groq (14,400/gün)
 - **📱 Çoklu Cihaz**: Ayarlardan 4 cihaza kadar tanımlayın, tüm cihazlara otomatik gönderim
 
 ### 🚀 İleri Seviye Özellikler
@@ -72,9 +73,12 @@ Sıradan "Hareket algılandı" yerine:
 
 1. **Ayarlar** > **Cihazlar & Hizmetler** > **Entegrasyon Ekle**
 2. **"NotifyAI"** arayın
-3. **Google Gemini API Anahtarınızı** girin
-   - Ücretsiz API anahtarı almak için: [Google AI Studio](https://aistudio.google.com/apikey)
-   - Günlük limit çok yüksek, normal kullanımda asla dolmaz
+3. **AI Provider Seçin**:
+   - **Gemini**: 1500 istek/gün, yüksek kalite
+     - API Key: [Google AI Studio](https://aistudio.google.com/apikey)
+   - **Groq**: 14,400 istek/gün (9.6x daha fazla!), çok hızlı
+     - API Key: [Groq Console](https://console.groq.com/)
+4. **API Anahtarınızı** girin
 
 ### 2. Bildirim Cihazlarını Tanımlayın (Opsiyonel)
 
@@ -211,17 +215,24 @@ automation:
 | **fun** | Eğlenceli, şakacı, emoji kullanır | "Kapı açıldı, misafir mi geldi yoksa kedi mi kaçtı? 🐱" |
 | **smart** | Zeki, bilgilendirici, net | "Ön kapı açıldı. Alarm aktif, saat 23:45." |
 | **formal** | Resmi, profesyonel, emoji yok | "Güvenlik uyarısı: Ön kapı sensörü tetiklendi." |
+| **sert** | Direkt, filtresiz, sert mizah | "Kapı yine açık kaldı lan!" |
 | **mixed** | Rastgele mod seçer | Her seferinde farklı ton |
+
+> **💡 İpucu**: "sert" modu Groq provider ile daha iyi çalışır (daha az sansür)
 
 ---
 
 ## ❓ Sık Sorulan Sorular
 
 ### Ücretli mi?
-Hayır! Google Gemini API ücretsiz. Günlük limit çok yüksek, normal kullanımda asla dolmaz.
+Hayır! Hem Gemini hem Groq ücretsiz. Groq 14,400 istek/gün limit sunuyor!
+
+### Hangi AI provider'ı seçmeliyim?
+- **Gemini**: Daha yüksek kalite, görsel analiz destekli (1500/gün)
+- **Groq**: Çok daha hızlı, 9.6x daha fazla limit (14,400/gün)
 
 ### OpenAI destekliyor mu?
-Hayır, sadece Google Gemini. Protobuf çakışması olmadan çalışması için REST API kullanıyoruz.
+Hayır, sadece Google Gemini ve Groq. Protobuf çakışması olmadan çalışması için REST API kullanıyoruz.
 
 ### Bildirimler nereye gider?
 Ayarlarda tanımladığınız cihazlara otomatik gider. Veya `notify_service` parametresiyle belirli bir cihaza gönderebilirsiniz.
