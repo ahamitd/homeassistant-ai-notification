@@ -140,6 +140,30 @@ async def validate_model(api_key, model_name):
     except Exception as e:
         return False, str(e)
 
+async def validate_groq_model(api_key, model_name):
+    """Validate Groq model with a minimal chat completion request."""
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": model_name,
+        "messages": [{"role": "user", "content": "hi"}],
+        "max_tokens": 1
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers) as response:
+                if response.status == 200:
+                    return True, None
+                else:
+                    error_data = await response.json()
+                    error_msg = error_data.get('error', {}).get('message', 'Unknown error')
+                    return False, f"API Error ({response.status}): {error_msg}"
+    except Exception as e:
+        return False, str(e)
+
 class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options."""
 
@@ -167,7 +191,12 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             # VALIDATION STEP
             model_name = user_input.get(CONF_MODEL)
-            success, error_msg = await validate_model(api_key, model_name)
+            
+            # Call appropriate validation based on provider
+            if provider == "groq":
+                success, error_msg = await validate_groq_model(api_key, model_name)
+            else:  # gemini
+                success, error_msg = await validate_model(api_key, model_name)
             
             if success:
                 return self.async_create_entry(title="", data=user_input)
