@@ -41,10 +41,7 @@ class AiNotificationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_AI_PROVIDER, default="gemini"): vol.In(AI_PROVIDERS),
             }),
-            errors=errors,
-            description_placeholders={
-                "info": "NotifyAI için yapay zeka sağlayıcısını seçin."
-            }
+            errors=errors
         )
     
     async def async_step_api_key(self, user_input=None):

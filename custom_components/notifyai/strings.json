@@ -3,14 +3,14 @@
         "step": {
             "user": {
                 "title": "NotifyAI Kurulumu",
-                "description": "{info}",
+                "description": "**🤖 NotifyAI Kurulumu**\n\nYapay zeka sağlayıcınızı seçin:\n\n• **Google Gemini**: 1,500 istek/gün (Ücretsiz)\n• **Groq**: 14,400 istek/gün (Ücretsiz, Çok Hızlı)\n\nSonraki adımda API anahtarınızı gireceksiniz.",
                 "data": {
                     "ai_provider": "Yapay Zeka Sağlayıcısı"
                 }
             },
             "api_key": {
                 "title": "API Anahtarı",
-                "description": "{provider_info}",
+                "description": "API anahtarınızı girin",
                 "data": {
                     "api_key": "Google Gemini API Anahtarı",
                     "groq_api_key": "Groq API Anahtarı"
@@ -18,8 +18,15 @@
             }
         },
         "error": {
-            "invalid_api_key": "Geçersiz API anahtarı veya bağlantı hatası.",
-            "cannot_connect": "Bağlantı kurulamadı."
+            "invalid_api_key": "❌ Geçersiz API anahtarı. Lütfen anahtarınızı kontrol edin.",
+            "cannot_connect": "❌ API'ye bağlanılamadı. İnternet bağlantınızı kontrol edin.",
+            "unknown": "❌ Bilinmeyen bir hata oluştu. Lütfen Home Assistant loglarını kontrol edin.",
+            "already_configured": "⚠️ Bu API anahtarı zaten yapılandırılmış.",
+            "api_error": "❌ API hatası: {error_message}",
+            "validation_failed": "❌ API anahtarı doğrulanamadı. Anahtarın geçerli olduğundan emin olun."
+        },
+        "abort": {
+            "already_configured": "Bu entegrasyon zaten yapılandırılmış."
         }
     },
     "options": {
@@ -28,13 +35,43 @@
                 "title": "NotifyAI Ayarları",
                 "description": "Yapay zeka modelini ve bildirim cihazlarınızı yapılandırın.",
                 "data": {
-                    "model": "AI Modeli (örn: gemini-flash-latest)",
+                    "model": "AI Modeli",
                     "notify_service_1": "Bildirim Cihazı 1",
                     "notify_service_2": "Bildirim Cihazı 2",
                     "notify_service_3": "Bildirim Cihazı 3",
-                    "notify_service_4": "Bildirim Cihazı 4"
+                    "notify_service_4": "Bildirim Cihazı 4",
+                    "advanced_settings": "Gelişmiş Ayarlar"
+                }
+            },
+            "advanced": {
+                "title": "Gelişmiş Ayarlar",
+                "description": "API anahtarı ve sağlayıcı yönetimi",
+                "data": {
+                    "action": "İşlem Seçin"
+                }
+            },
+            "change_api_key": {
+                "title": "API Anahtarını Değiştir",
+                "description": "Yeni API anahtarınızı girin",
+                "data": {
+                    "new_api_key": "Yeni API Anahtarı"
+                }
+            },
+            "change_provider": {
+                "title": "Sağlayıcıyı Değiştir",
+                "description": "Yeni sağlayıcı ve API anahtarı",
+                "data": {
+                    "ai_provider": "Yeni Sağlayıcı",
+                    "api_key": "Gemini API Anahtarı",
+                    "groq_api_key": "Groq API Anahtarı"
                 }
             }
+        },
+        "error": {
+            "invalid_api_key": "❌ Geçersiz API anahtarı",
+            "invalid_model": "❌ Geçersiz model seçimi",
+            "quota_exceeded": "⚠️ API kotanız dolmuş. Lütfen daha sonra tekrar deneyin.",
+            "validation_failed": "❌ Doğrulama başarısız. API anahtarını kontrol edin."
         }
     }
 }
