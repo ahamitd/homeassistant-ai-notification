@@ -257,7 +257,20 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             
             # Save changes if no errors (either validation passed or no validation needed)
             if not errors:
-                return self.async_create_entry(title="", data=user_input)
+                # Ensure all notification service fields are explicitly included
+                # This prevents old values from persisting when fields are cleared
+                save_data = {
+                    CONF_MODEL: user_input.get(CONF_MODEL),
+                    CONF_NOTIFY_SERVICE_1: user_input.get(CONF_NOTIFY_SERVICE_1, ""),
+                    CONF_NOTIFY_SERVICE_2: user_input.get(CONF_NOTIFY_SERVICE_2, ""),
+                    CONF_NOTIFY_SERVICE_3: user_input.get(CONF_NOTIFY_SERVICE_3, ""),
+                    CONF_NOTIFY_SERVICE_4: user_input.get(CONF_NOTIFY_SERVICE_4, ""),
+                }
+                
+                # Debug: Log what we're saving
+                _LOGGER.warning("NotifyAI - Saving options: %s", save_data)
+                
+                return self.async_create_entry(title="", data=save_data)
 
         current_model = self._config_entry.options.get(CONF_MODEL)
         
