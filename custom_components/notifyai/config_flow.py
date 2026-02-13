@@ -197,6 +197,22 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         if not api_key or len(api_key) < 8:
             return "***"
         return f"{api_key[:3]}...{api_key[-3:]}"
+    
+    def _get_notify_services(self) -> dict:
+        """Get all available notify services in Home Assistant."""
+        notify_services = {"": "Yok"}  # First option is "None"
+        
+        # Get all services in the notify domain
+        if self.hass and hasattr(self.hass, 'services'):
+            services = self.hass.services.async_services()
+            if 'notify' in services:
+                for service_name in services['notify']:
+                    # Create full service name (e.g., notify.mobile)
+                    full_name = f"notify.{service_name}"
+                    # Use service name as display name
+                    notify_services[full_name] = service_name
+        
+        return notify_services
 
     async def async_step_init(self, user_input=None):
         """Manage the main options - Model and Notification Services."""
@@ -325,6 +341,9 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
         provider_display = "Google Gemini" if provider == "gemini" else "Groq"
         masked_key = self._mask_api_key(api_key)
         
+        # Get available notify services
+        notify_services = self._get_notify_services()
+        
         # Use user_input values if available (e.g., when validation failed),
         # otherwise use saved options
         if user_input and errors:
@@ -340,14 +359,19 @@ class AiNotificationOptionsFlowHandler(config_entries.OptionsFlow):
             notify_3 = self._config_entry.options.get(CONF_NOTIFY_SERVICE_3, "")
             notify_4 = self._config_entry.options.get(CONF_NOTIFY_SERVICE_4, "")
 
+        # Ensure selected services are in the list (if they were manually entered before)
+        for srv in [notify_1, notify_2, notify_3, notify_4]:
+            if srv and srv not in notify_services:
+                notify_services[srv] = srv
+
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
                 vol.Optional(CONF_MODEL, default=current_model): vol.In(model_options),
-                vol.Optional(CONF_NOTIFY_SERVICE_1, default=notify_1): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_2, default=notify_2): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_3, default=notify_3): str,
-                vol.Optional(CONF_NOTIFY_SERVICE_4, default=notify_4): str,
+                vol.Optional(CONF_NOTIFY_SERVICE_1, default=notify_1): vol.In(notify_services),
+                vol.Optional(CONF_NOTIFY_SERVICE_2, default=notify_2): vol.In(notify_services),
+                vol.Optional(CONF_NOTIFY_SERVICE_3, default=notify_3): vol.In(notify_services),
+                vol.Optional(CONF_NOTIFY_SERVICE_4, default=notify_4): vol.In(notify_services),
                 vol.Optional("advanced_settings", default=False): bool,
             }),
             errors=errors
